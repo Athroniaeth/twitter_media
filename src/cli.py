@@ -10,7 +10,7 @@ from pydantic import HttpUrl
 from transformers.utils import logging as logging_hf
 from typer import Typer
 
-from src.utils import clean_extracted_text
+from src.utils import clean_extracted_text, valid_pydantic_type
 
 cli = Typer(no_args_is_help=True)
 
@@ -97,7 +97,7 @@ def create_from_article(
     config: str = typer.Option("", callback=conf_callback, is_eager=True),  # noqa: Parameter 'config' value is not used
     url_article: str = typer.Option(..., help="URL of the article to generate tweet information."),
     model_id: str = typer.Option("meta-llama/Meta-Llama-3-8B-Instruct", help="Model ID huggingface to use."),
-    quantization_int4: bool = typer.Option(True, help="Active the 4-bit quantization."),
+    quantization_int4: bool = typer.Option(False, help="Active the 4-bit quantization."),
     local: bool = typer.Option(False, help="Active the local mode to load the model."),
 ):
     """
@@ -113,9 +113,7 @@ def create_from_article(
         None
     """
     # Validation of input parameters
-    if HttpUrl(url_article) is None:
-        typer.echo(f"Invalid URL: {url_article}")
-        raise typer.Exit(1)
+    valid_pydantic_type(url_article, HttpUrl)
 
     # Print the parameters
     typer.echo(f"URL article: {url_article}")
@@ -130,6 +128,16 @@ def get_content_url(
     url: str = typer.Option(..., help="URL of the article to extract the content."),
     limit_clean: int = typer.Option(100, help="Number of try to clean the text extracted."),
 ):
+    """
+    Get the content of an article from a URL.
+
+    Args:
+        url (str): URL of the article to extract the content.
+        limit_clean (int): Number of try to clean the text extracted
+    """
+    # Validation of input parameters
+    valid_pydantic_type(url, HttpUrl)
+
     # Send a request to the URL to get the content of the article
     response = requests.get(url)
 
