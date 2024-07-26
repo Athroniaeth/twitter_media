@@ -10,12 +10,10 @@ from langchain_core.language_models import BaseLLM
 
 @lru_cache(maxsize=1)
 def get_llm_model(
-        model_id: str,
-        quantization_int4: bool = True,
-        local: bool = False,
-
-        hf_token: Optional[str] = None,
-
+    model_id: str,
+    quantization_int4: bool = True,
+    local: bool = False,
+    hf_token: Optional[str] = None,
 ) -> BaseLLM:
     """
     Load a CausalLM model (local or cloud).
@@ -50,10 +48,10 @@ def get_llm_model(
 
 
 def _get_llm_model_hf_cloud(
-        model_id: str,
-        hf_token: str,
+    model_id: str,
+    hf_token: str,
 ):
-    """ Load a model from Hugging Face Cloud. """
+    """Load a model from Hugging Face Cloud."""
     logging.debug(f"Loading model '{model_id}' from Hugging Face Cloud.")
 
     llm_model = HuggingFaceHub(
