@@ -29,10 +29,10 @@ class Level(StrEnum):
 
 @cli.callback()
 def callback(
-        ctx: typer.Context,
-        hf_token: str = typer.Option(None, envvar="HF_TOKEN", help="Access token for Hugging Face API."),
-        logging_level: Level = typer.Option(Level.ERROR, help="Log level for application logs."),
-        logging_level_hf: Level = typer.Option(Level.ERROR, help="Log level for Hugging Face logs."),
+    ctx: typer.Context,
+    hf_token: str = typer.Option(None, envvar="HF_TOKEN", help="Access token for Hugging Face API."),
+    logging_level: Level = typer.Option(Level.ERROR, help="Log level for application logs."),
+    logging_level_hf: Level = typer.Option(Level.ERROR, help="Log level for Hugging Face logs."),
 ):
     """
     Initialize the CLI application context.
@@ -96,11 +96,9 @@ def conf_callback(ctx: typer.Context, param: typer.CallbackParam, filepath: str)
 
 @cli.command()
 def create_from_article(
-        config: str = typer.Option("", callback=conf_callback, is_eager=True),  # noqa: Parameter 'config' value is not used
-        url_article: str = typer.Option(..., help="URL of the article to generate tweet information."),
-        model_id: str = typer.Option("meta-llama/Meta-Llama-3-8B-Instruct", help="Model ID huggingface to use."),
-        quantization_int4: bool = typer.Option(False, help="Active the 4-bit quantization."),
-        local: bool = typer.Option(False, help="Active the local mode to load the model."),
+    config: str = typer.Option("", callback=conf_callback, is_eager=True),  # noqa: Parameter 'config' value is not used
+    url_article: str = typer.Option(..., help="URL of the article to generate tweet information."),
+    model_id: str = typer.Option("meta-llama/Meta-Llama-3-8B-Instruct", help="Model ID huggingface to use."),
 ):
     """
     Generate tweet information from an article (url).
@@ -108,8 +106,6 @@ def create_from_article(
     Args:
         url_article (str): URL of the article to generate tweet information.
         model_id (str): Model ID huggingface to use.
-        quantization_int4 (bool): Active the 4-bit quantization.
-        local (bool): Active the local mode to load the model.
 
     Returns:
         None
@@ -132,8 +128,8 @@ def create_from_article(
 
 @cli.command()
 def get_content_url(
-        url: str = typer.Option(..., help="URL of the article to extract the content."),
-        limit_clean: int = typer.Option(100, help="Number of try to clean the text extracted."),
+    url: str = typer.Option(..., help="URL of the article to extract the content."),
+    limit_clean: int = typer.Option(100, help="Number of try to clean the text extracted."),
 ) -> str:
     """
     Get the content of an article from a URL.

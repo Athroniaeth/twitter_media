@@ -13,5 +13,5 @@ def get_helper_output_parser(pydantic_object: Type[BaseModel]):
     Notes:
         Cela permet d'éviter les erreurs de génération avec les petits modèles
     """
-    first_attr = list(pydantic_object.__dict__['model_fields'].keys())[0]
+    first_attr = list(pydantic_object.__dict__["model_fields"].keys())[0]
     return f"""```{{\"{first_attr}\": """

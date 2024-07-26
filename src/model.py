@@ -2,30 +2,24 @@ import logging
 import os
 import time
 from functools import lru_cache, wraps
-from typing import Optional, Type
+from typing import Optional
 
 from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
 from langchain_core.language_models import BaseLLM
-from pydantic import BaseModel
 
 
 @lru_cache(maxsize=1)
 def get_llm_model(
-        model_id: str,
-        local: bool = False,
-        quantization_int4: bool = True,
-        hf_token: Optional[str] = None,
-
-        max_new_tokens=512,
-        models_kwargs: Optional[dict] = None,
+    model_id: str,
+    hf_token: Optional[str] = None,
+    max_new_tokens=512,
+    models_kwargs: Optional[dict] = None,
 ) -> BaseLLM:
     """
     Load a CausalLM model (local or cloud).
 
     Args:
         model_id (str): Model ID to load.
-        local (bool): Use local mode to load the model.
-        quantization_int4 (bool): Use 4-bit quantization.
         hf_token (Optional[str]): Hugging Face API access token.
 
         max_new_tokens (int): Maximum number of tokens to generate.
@@ -34,21 +28,10 @@ def get_llm_model(
     Returns:
         BaseLLM: Language model.
     """
-    if local:
-        logging.warning("Mode 'local' is not supported for Hugging Face Cloud models. Switching to 'local=False'.")
-
-    if quantization_int4:
-        logging.warning("4-bit quantization is not supported for Hugging Face Cloud models. Switching to 'quantization_int4=False'.")
-
     if hf_token is None:
         hf_token = os.environ["HF_TOKEN"]
 
-    llm_model = _get_llm_model_hf_cloud(
-        model_id=model_id,
-        hf_token=hf_token,
-        max_new_tokens=max_new_tokens,
-        models_kwargs=models_kwargs
-    )
+    llm_model = _get_llm_model_hf_cloud(model_id=model_id, hf_token=hf_token, max_new_tokens=max_new_tokens, models_kwargs=models_kwargs)
 
     logging.debug(f'Model "{model_id}" loaded successfully.')
     llm_model.name = model_id
@@ -57,22 +40,15 @@ def get_llm_model(
 
 
 def _get_llm_model_hf_cloud(
-        model_id: str,
-        hf_token: str,
-
-        max_new_tokens=512,
-        models_kwargs: Optional[dict] = None,
+    model_id: str,
+    hf_token: str,
+    max_new_tokens=512,
+    models_kwargs: Optional[dict] = None,
 ):
     """Load a model from Hugging Face Cloud."""
     logging.debug(f"Loading model '{model_id}' from Hugging Face Cloud.")
 
-    llm_model = HuggingFaceEndpoint(
-        repo_id=model_id,
-        huggingfacehub_api_token=hf_token,
-
-        max_new_tokens=max_new_tokens,
-        models_kwargs=models_kwargs
-    )
+    llm_model = HuggingFaceEndpoint(repo_id=model_id, huggingfacehub_api_token=hf_token, max_new_tokens=max_new_tokens, models_kwargs=models_kwargs)
 
     return llm_model
 

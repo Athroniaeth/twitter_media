@@ -11,6 +11,14 @@ from src.parser.helper import get_helper_output_parser
 
 
 class SummaryText(BaseModel):
+    """
+    Summary of the extracted text.
+
+    Attributes:
+        reasoning (str): Think about what information is useful and important, and what information is required for a good summary of the text.
+        text_summary (str): Text summary of the extracted information, in a few sentences, more that 255 characters.
+    """
+
     reasoning: str = Field(description="think about what information is useful and important, and what information is required for a good summary of the text")
     text_summary: str = Field(description="text summary of the extracted information, in a few sentences, more that 255 characters")
 
@@ -19,8 +27,8 @@ class SummaryText(BaseModel):
 
 
 def summarize_text(
-        content_text: str,
-        llm_model: BaseLLM,
+    content_text: str,
+    llm_model: BaseLLM,
 ) -> SummaryText:
     """
     Summarize the text extracted from the article.
@@ -42,21 +50,21 @@ def summarize_text(
         llm_model=llm_model,
         content_type="text",
         query="Extract the main information from the article and summarize it. Write this like a tweet of modern media. Always start the tweet by '🇫🇷 FLASH: '",
-        system_answer="Here is the json corresponding to the pydantic class with the task you provided"
+        system_answer="Here is the json corresponding to the pydantic class with the task you provided",
     )
 
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 def task_to_json(
-        task: Type[T],
-        template: str,
-        content_text: str,
-        llm_model: BaseLLM,
-        content_type: str,
-        query: str,
-        system_answer: str = "Here is the json corresponding to the pydantic class with the task you provided."
+    task: Type[T],
+    template: str,
+    content_text: str,
+    llm_model: BaseLLM,
+    content_type: str,
+    query: str,
+    system_answer: str = "Here is the json corresponding to the pydantic class with the task you provided.",
 ) -> T:
     """
 
@@ -73,11 +81,11 @@ def task_to_json(
         T: Class instance of the task from JSON output.
 
     """
-    assert '{{content_text}}' in template, "The template must contain '{{content_text}}' to inject the content text."
-    assert '{{query}}' in template, "The template must contain '{{query}}' to inject the query."
-    assert '{{content_type}}' in template, "The template must contain '{{content_type}}' to inject the content type."
-    assert '{{system_answer}}' in template, "The template must contain '{{system_answer}}' to inject the system answer."
-    assert '{{format_instructions}}' in template, "The template must contain '{{format_instructions}}' to inject the format instructions."
+    assert "{{content_text}}" in template, "The template must contain '{{content_text}}' to inject the content text."
+    assert "{{query}}" in template, "The template must contain '{{query}}' to inject the query."
+    assert "{{content_type}}" in template, "The template must contain '{{content_type}}' to inject the content type."
+    assert "{{system_answer}}" in template, "The template must contain '{{system_answer}}' to inject the system answer."
+    assert "{{format_instructions}}" in template, "The template must contain '{{format_instructions}}' to inject the format instructions."
 
     # Create OutputParser (JSON -> Python object)
     parser = PydanticOutputParser(pydantic_object=task)
@@ -107,7 +115,7 @@ def task_to_json(
     generated_llm_output = helper_output_parser + llm_output
 
     # Encapsulate the JSON in a code block
-    processed_generated_llm_output = generated_llm_output.split('```')[1]
+    processed_generated_llm_output = generated_llm_output.split("```")[1]
     processed_generated_llm_output = f"```{processed_generated_llm_output}```"
 
     output = parser.parse(processed_generated_llm_output)
