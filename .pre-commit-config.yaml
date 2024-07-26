@@ -1,0 +1,51 @@
+repos:
+  - repo: local
+    hooks:
+      - id: poetry
+        name: poetry
+        entry: scripts\\pre-commit\\poetry.bat
+        language: system
+        types: [ python ]
+        pass_filenames: false
+        always_run: true
+
+      - id: ruff-format
+        name: ruff-format
+        entry: scripts\\pre-commit\\formatter.bat
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: ruff-lint
+        name: ruff-lint
+        entry: scripts\\pre-commit\\linter.bat
+        language: system
+        types: [ python ]
+        pass_filenames: false
+        always_run: true
+
+      - id: bandit
+        name: bandit
+        entry: scripts\\pre-commit\\bandit.bat
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+
+      - id: coverage
+        name: coverage
+        entry: scripts\\pre-commit\\coverage.bat
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: mypy
+        name: mypy
+        entry: scripts\\pre-commit\\mypy.bat
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
