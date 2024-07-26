@@ -10,6 +10,8 @@ from pydantic import HttpUrl
 from transformers.utils import logging as logging_hf
 from typer import Typer
 
+from src.model import get_llm_model
+from src.parser.task import summarize_text
 from src.utils import clean_extracted_text, valid_pydantic_type
 
 cli = Typer(no_args_is_help=True)
@@ -27,10 +29,10 @@ class Level(StrEnum):
 
 @cli.callback()
 def callback(
-    ctx: typer.Context,
-    hf_token: str = typer.Option(None, envvar="HF_TOKEN", help="Access token for Hugging Face API."),
-    logging_level: Level = typer.Option(Level.ERROR, help="Log level for application logs."),
-    logging_level_hf: Level = typer.Option(Level.ERROR, help="Log level for Hugging Face logs."),
+        ctx: typer.Context,
+        hf_token: str = typer.Option(None, envvar="HF_TOKEN", help="Access token for Hugging Face API."),
+        logging_level: Level = typer.Option(Level.ERROR, help="Log level for application logs."),
+        logging_level_hf: Level = typer.Option(Level.ERROR, help="Log level for Hugging Face logs."),
 ):
     """
     Initialize the CLI application context.
@@ -94,11 +96,11 @@ def conf_callback(ctx: typer.Context, param: typer.CallbackParam, filepath: str)
 
 @cli.command()
 def create_from_article(
-    config: str = typer.Option("", callback=conf_callback, is_eager=True),  # noqa: Parameter 'config' value is not used
-    url_article: str = typer.Option(..., help="URL of the article to generate tweet information."),
-    model_id: str = typer.Option("meta-llama/Meta-Llama-3-8B-Instruct", help="Model ID huggingface to use."),
-    quantization_int4: bool = typer.Option(False, help="Active the 4-bit quantization."),
-    local: bool = typer.Option(False, help="Active the local mode to load the model."),
+        config: str = typer.Option("", callback=conf_callback, is_eager=True),  # noqa: Parameter 'config' value is not used
+        url_article: str = typer.Option(..., help="URL of the article to generate tweet information."),
+        model_id: str = typer.Option("meta-llama/Meta-Llama-3-8B-Instruct", help="Model ID huggingface to use."),
+        quantization_int4: bool = typer.Option(False, help="Active the 4-bit quantization."),
+        local: bool = typer.Option(False, help="Active the local mode to load the model."),
 ):
     """
     Generate tweet information from an article (url).
@@ -116,18 +118,23 @@ def create_from_article(
     valid_pydantic_type(url_article, HttpUrl)
 
     # Print the parameters
-    typer.echo(f"URL article: {url_article}")
-    typer.echo(f"Model ID: {model_id}")
-    typer.echo(f"Quantization int4: {quantization_int4}")
-    typer.echo(f"Local: {local}")
-    typer.echo()
+    text = get_content_url(url_article, 100)
+
+    # Load the LLM for inference
+    llm_model = get_llm_model(model_id)
+
+    # Launch task summary
+    summary_task = summarize_text(text, llm_model)
+
+    # Print the summary
+    typer.echo(summary_task.text_summary)
 
 
 @cli.command()
 def get_content_url(
-    url: str = typer.Option(..., help="URL of the article to extract the content."),
-    limit_clean: int = typer.Option(100, help="Number of try to clean the text extracted."),
-):
+        url: str = typer.Option(..., help="URL of the article to extract the content."),
+        limit_clean: int = typer.Option(100, help="Number of try to clean the text extracted."),
+) -> str:
     """
     Get the content of an article from a URL.
 
@@ -155,8 +162,11 @@ def get_content_url(
 
         # Return to console the content of the article (python src ... > file.txt)
         typer.echo(article_text)
+
+        return article_text
     else:
         logging.error(f"Failing to fetch the content of the article. ({response.status_code=})")
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":
