@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "twitter-media"
+version = "0.1.0"
+description = ""
+authors = ["Athroniaeth <pierre.chaumont@hotmail.fr>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+twikit = "^2.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
