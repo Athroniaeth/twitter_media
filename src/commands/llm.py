@@ -15,7 +15,7 @@ cli = Typer(no_args_is_help=True)
 def create_from_article(
     config: str = typer.Option("", callback=conf_callback, is_eager=True),  # noqa
     url: str = typer.Option(..., help="URL of the article to generate tweet information."),
-    model_id: str = typer.Option("meta-llama/Meta-Llama-3-8B-Instruct", help="Model ID huggingface to use."),
+    model_id: str = typer.Option("mistralai/Mistral-7B-Instruct-v0.3", help="Model ID huggingface to use."),
 ):
     """
     Generate tweet information from an article (url).

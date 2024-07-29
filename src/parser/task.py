@@ -27,8 +27,9 @@ class SummaryText(BaseModel):
 
 
 def summarize_text(
-    content_text: str,
-    llm_model: BaseLLM,
+        content_text: str,
+        llm_model: BaseLLM,
+        language: str = "French",
 ) -> SummaryText:
     """
     Summarize the text extracted from the article.
@@ -36,11 +37,12 @@ def summarize_text(
     Args:
         content_text (str): Extracted text from the article.
         llm_model (BaseLLM): Language model to use to summarize the text.
+        language (str): Language of the summary (the language in english like 'French', 'Spanish', 'German', etc.).
 
     Returns:
         SummaryText: Object containing the reasoning and the text summary.
     """
-    template_path = TEMPLATES_PATH / "summarize.jinja2"
+    template_path = TEMPLATES_PATH / "task.jinja2"
     template = template_path.read_text(encoding="utf-8")
 
     return task_to_json(
@@ -49,8 +51,6 @@ def summarize_text(
         content_text=content_text,
         llm_model=llm_model,
         content_type="text",
-        query="Extract the main information from the article and summarize it. Write this like a tweet of modern media. Always start the tweet by '🇫🇷 FLASH: '",
-        system_answer="Here is the json corresponding to the pydantic class with the task you provided",
     )
 
 
@@ -58,13 +58,11 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def task_to_json(
-    task: Type[T],
-    template: str,
-    content_text: str,
-    llm_model: BaseLLM,
-    content_type: str,
-    query: str,
-    system_answer: str = "Here is the json corresponding to the pydantic class with the task you provided.",
+        task: Type[T],
+        template: str,
+        content_text: str,
+        llm_model: BaseLLM,
+        content_type: str,
 ) -> T:
     """
 
@@ -75,16 +73,13 @@ def task_to_json(
         llm_model (BaseLLM): Language model to use.
         content_type (str): Type of content extracted.
         query (str): Query to prompt the language model.
-        system_answer (str): System answer to provide to the user.
 
     Returns:
         T: Class instance of the task from JSON output.
 
     """
     assert "{{content_text}}" in template, "The template must contain '{{content_text}}' to inject the content text."
-    assert "{{query}}" in template, "The template must contain '{{query}}' to inject the query."
     assert "{{content_type}}" in template, "The template must contain '{{content_type}}' to inject the content type."
-    assert "{{system_answer}}" in template, "The template must contain '{{system_answer}}' to inject the system answer."
     assert "{{format_instructions}}" in template, "The template must contain '{{format_instructions}}' to inject the format instructions."
 
     # Create OutputParser (JSON -> Python object)
@@ -98,10 +93,8 @@ def task_to_json(
         template_format="jinja2",
         template=template,
         partial_variables={
-            "query": query,
             "content_text": content_text,
             "content_type": content_type,
-            "system_answer": system_answer,
             "helper_output_parser": helper_output_parser,
             "format_instructions": parser.get_format_instructions(),
         },
